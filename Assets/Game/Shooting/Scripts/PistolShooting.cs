@@ -7,7 +7,7 @@ namespace Game.Shooting.Scripts
     public class PistolShooting : MonoBehaviour
     {
         [SerializeField] private GameObject _bulletPrefab = null;
-        [SerializeField] private Transform _muzzleLocation = null;
+        [SerializeField] private Transform _muzzleRotation = null;
 
         private float _lastShootTime = 0f;
         private float _nextShootTime = 0.1f;
@@ -26,17 +26,27 @@ namespace Game.Shooting.Scripts
         }
 
 
-        protected void OnShoot(object sender, float v)
+        protected void OnShoot(object sender, ShootEventArgs eventArgs)
         {
             if (_lastShootTime + _nextShootTime <= Time.time)
             {
                 _lastShootTime = Time.time;
 
                 //shoot
+                GameObject g = Instantiate(_bulletPrefab, eventArgs.muzzleLoc, _muzzleRotation.rotation);
 
-                GameObject g = Instantiate(_bulletPrefab, _muzzleLocation.position, _muzzleLocation.rotation);
+                //rigid body shooting
+                var body = g.GetComponent<Rigidbody>();
+                if (body != null)
+                {
+                    Vector3 shootDirection = (eventArgs.shootPos - eventArgs.muzzleLoc).normalized;
+
+                    body.AddForce(shootDirection * 50, ForceMode.Impulse);
+                }
+
 
                 Destroy(g, 2);
+
             }
         }
 

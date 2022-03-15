@@ -20,6 +20,8 @@ namespace Game.Input.Scripts
         private Vector2 _movement;
         private Vector2 _aim;
 
+        private Vector3 _targetPosition;
+
         private Vector3 _playerVelocity = Vector3.zero;
 
         private PlayerControls _playerControls = null;
@@ -41,6 +43,11 @@ namespace Game.Input.Scripts
             _shootingInstigator = GetComponent<IShootingInstigator>();
         }
 
+        private void OnKeyboardMouseShoot(InputAction.CallbackContext obj)
+        {
+            _shootingInstigator.DoShoot(_targetPosition);
+        }
+
         protected void OnDestroy()
         {
             _playerInput.onControlsChanged -= OnInputDeviceChanged;
@@ -49,11 +56,14 @@ namespace Game.Input.Scripts
         private void OnEnable()
         {
             _playerControls.Enable();
+
+            _playerControls.Controls.Shoot.performed += OnKeyboardMouseShoot;
         }
 
         private void OnDisable()
         {
             _playerControls.Disable();
+            _playerControls.Controls.Shoot.performed -= OnKeyboardMouseShoot;
         }
 
         private void Update()
@@ -77,17 +87,17 @@ namespace Game.Input.Scripts
                         transform.rotation = Quaternion.RotateTowards(transform.rotation, newrotation, _gamepadRotateSmoothing * Time.deltaTime);
                     }
 
-                    //alternative, less precise though
-                    //transform.LookAt(new Vector3(_aim.x + transform.position.x, 0f, _aim.y + transform.position.z));
-                    //transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
-
+                    //anticipate a target position?
+                    Vector3 targetPos = (transform.forward * 100.0f + transform.position);
+                    Debug.DrawLine(transform.position, (transform.forward * 100.0f + transform.position), Color.green, 1f);
 
                     //fire a shot
-                    _shootingInstigator.DoShoot(1f);
+                    _shootingInstigator.DoShoot(targetPos);
                 }
             }
             else
             {
+/*
                 Ray ray = Camera.main.ScreenPointToRay(_aim);
                 Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
                 float rayDistance;
@@ -97,15 +107,33 @@ namespace Game.Input.Scripts
                     Vector3 point = ray.GetPoint(rayDistance);
                     LookAt(point);
                 }
+*/
+/*
+                Ray ray = Camera.main.ScreenPointToRay(_aim);
+                if (Physics.Raycast(ray, out RaycastHit hitInfo, 300f))
+                {
+                    var target = hitInfo.point;
+
+                    target.y = transform.position.y;
+
+                    transform.LookAt(target);
+                }
+*/
+
+                //smooth AF rotation if using mouse
+                Ray ray = Camera.main.ScreenPointToRay(_aim);
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit))
+                {
+                    _targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
+
+                    Quaternion rotation = Quaternion.LookRotation(_targetPosition - transform.position);
+
+                    transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * 10f);
+                }
             }
 
-        }
-
-        private void LookAt(Vector3 lookPoint)
-        {
-            Vector3 heightCorrectedPoint = new Vector3(lookPoint.x, transform.position.y, lookPoint.z);
-
-            transform.LookAt(heightCorrectedPoint);
         }
 
         private void HandleMovement()
@@ -136,7 +164,7 @@ namespace Game.Input.Scripts
             _aim = _playerControls.Controls.Aim.ReadValue<Vector2>();
         }
 
-        public void OnInputDeviceChanged(PlayerInput playerInput)
+        private void OnInputDeviceChanged(PlayerInput playerInput)
         {
             _isGamepad = playerInput.currentControlScheme.Contains("Gamepad");
         }
