@@ -55,6 +55,15 @@ namespace Game.Input.Scripts
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MouseAim"",
+                    ""type"": ""Value"",
+                    ""id"": ""cac3aa81-c496-4e1b-a3ce-e57ad2699fa6"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -71,21 +80,10 @@ namespace Game.Input.Scripts
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e594795a-3c64-4c38-9ea8-78970d7347f5"",
-                    ""path"": ""<Mouse>/position"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""KeyboardMouse"",
-                    ""action"": ""Aim"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""5acd245b-d9c1-4cde-b462-1f6c095f6981"",
                     ""path"": ""<Gamepad>/leftStick"",
                     ""interactions"": """",
-                    ""processors"": """",
+                    ""processors"": ""StickDeadzone"",
                     ""groups"": ""Gamepad"",
                     ""action"": ""Movement"",
                     ""isComposite"": false,
@@ -156,6 +154,17 @@ namespace Game.Input.Scripts
                     ""action"": ""Shoot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7124a8d9-52c3-47f4-8b77-7116275fbe28"",
+                    ""path"": ""<Mouse>/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""MouseAim"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -195,6 +204,7 @@ namespace Game.Input.Scripts
             m_Controls_Movement = m_Controls.FindAction("Movement", throwIfNotFound: true);
             m_Controls_Aim = m_Controls.FindAction("Aim", throwIfNotFound: true);
             m_Controls_Shoot = m_Controls.FindAction("Shoot", throwIfNotFound: true);
+            m_Controls_MouseAim = m_Controls.FindAction("MouseAim", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -257,6 +267,7 @@ namespace Game.Input.Scripts
         private readonly InputAction m_Controls_Movement;
         private readonly InputAction m_Controls_Aim;
         private readonly InputAction m_Controls_Shoot;
+        private readonly InputAction m_Controls_MouseAim;
         public struct ControlsActions
         {
             private @PlayerControls m_Wrapper;
@@ -264,6 +275,7 @@ namespace Game.Input.Scripts
             public InputAction @Movement => m_Wrapper.m_Controls_Movement;
             public InputAction @Aim => m_Wrapper.m_Controls_Aim;
             public InputAction @Shoot => m_Wrapper.m_Controls_Shoot;
+            public InputAction @MouseAim => m_Wrapper.m_Controls_MouseAim;
             public InputActionMap Get() { return m_Wrapper.m_Controls; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -282,6 +294,9 @@ namespace Game.Input.Scripts
                     @Shoot.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnShoot;
                     @Shoot.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnShoot;
                     @Shoot.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnShoot;
+                    @MouseAim.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnMouseAim;
+                    @MouseAim.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnMouseAim;
+                    @MouseAim.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnMouseAim;
                 }
                 m_Wrapper.m_ControlsActionsCallbackInterface = instance;
                 if (instance != null)
@@ -295,6 +310,9 @@ namespace Game.Input.Scripts
                     @Shoot.started += instance.OnShoot;
                     @Shoot.performed += instance.OnShoot;
                     @Shoot.canceled += instance.OnShoot;
+                    @MouseAim.started += instance.OnMouseAim;
+                    @MouseAim.performed += instance.OnMouseAim;
+                    @MouseAim.canceled += instance.OnMouseAim;
                 }
             }
         }
@@ -322,6 +340,7 @@ namespace Game.Input.Scripts
             void OnMovement(InputAction.CallbackContext context);
             void OnAim(InputAction.CallbackContext context);
             void OnShoot(InputAction.CallbackContext context);
+            void OnMouseAim(InputAction.CallbackContext context);
         }
     }
 }

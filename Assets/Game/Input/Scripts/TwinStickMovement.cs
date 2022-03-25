@@ -13,12 +13,15 @@ namespace Game.Input.Scripts
         [SerializeField] private float _gravityValue = -9.81f;
         [SerializeField] private float _controllerDeadzone = 0.1f;
         [SerializeField] private float _gamepadRotateSmoothing = 1000f;
+        [SerializeField] private float _keyboardMouseRotationSmoothing = 10f;
 
         private bool _isGamepad = false;
         private CharacterController _characterController = null;
 
-        private Vector2 _movement;
-        private Vector2 _aim;
+        private Vector2 _movement = Vector2.zero;
+        private Vector2 _aim = Vector2.zero;
+        private Vector2 _mouseAim = Vector2.zero;
+        private bool _mouseShootingStarted = false;
 
         private Vector3 _targetPosition;
 
@@ -43,9 +46,15 @@ namespace Game.Input.Scripts
             _shootingInstigator = GetComponent<IShootingInstigator>();
         }
 
-        private void OnKeyboardMouseShoot(InputAction.CallbackContext obj)
+        private void OnKeyboardMouseShootStart(InputAction.CallbackContext obj)
         {
-            _shootingInstigator.DoShoot(_targetPosition);
+            //_shootingInstigator.DoShoot(_targetPosition);
+            _mouseShootingStarted = true;
+        }
+
+        private void OnKeyboardMouseShootCancelled(InputAction.CallbackContext obj)
+        {
+            _mouseShootingStarted = false;
         }
 
         protected void OnDestroy()
@@ -57,13 +66,16 @@ namespace Game.Input.Scripts
         {
             _playerControls.Enable();
 
-            _playerControls.Controls.Shoot.performed += OnKeyboardMouseShoot;
+            _playerControls.Controls.Shoot.started += OnKeyboardMouseShootStart;
+            _playerControls.Controls.Shoot.canceled += OnKeyboardMouseShootCancelled;
         }
 
         private void OnDisable()
         {
             _playerControls.Disable();
-            _playerControls.Controls.Shoot.performed -= OnKeyboardMouseShoot;
+            _playerControls.Controls.Shoot.performed -= OnKeyboardMouseShootStart;
+            _playerControls.Controls.Shoot.canceled -= OnKeyboardMouseShootCancelled;
+            _mouseShootingStarted = false;
         }
 
         private void Update()
@@ -97,71 +109,83 @@ namespace Game.Input.Scripts
             }
             else
             {
-/*
-                Ray ray = Camera.main.ScreenPointToRay(_aim);
-                Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-                float rayDistance;
-
-                if (groundPlane.Raycast(ray, out rayDistance))
+                if (_mouseAim != Vector2.zero)
                 {
-                    Vector3 point = ray.GetPoint(rayDistance);
-                    LookAt(point);
+                    //smooth AF rotation if using mouse
+                    Ray ray = Camera.main.ScreenPointToRay(_mouseAim);
+                    RaycastHit hit;
+
+                    if (Physics.Raycast(ray, out hit))
+                    {
+                        _targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
+
+                        Quaternion rotation = Quaternion.LookRotation(_targetPosition - transform.position);
+
+                        transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * _keyboardMouseRotationSmoothing);
+                    }
                 }
-*/
-/*
-                Ray ray = Camera.main.ScreenPointToRay(_aim);
-                if (Physics.Raycast(ray, out RaycastHit hitInfo, 300f))
+
+                //workaround for continuous "hold mouse shoot button" inputs
+                if (_mouseShootingStarted)
                 {
-                    var target = hitInfo.point;
-
-                    target.y = transform.position.y;
-
-                    transform.LookAt(target);
-                }
-*/
-
-                //smooth AF rotation if using mouse
-                Ray ray = Camera.main.ScreenPointToRay(_aim);
-                RaycastHit hit;
-
-                if (Physics.Raycast(ray, out hit))
-                {
-                    _targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
-
-                    Quaternion rotation = Quaternion.LookRotation(_targetPosition - transform.position);
-
-                    transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * 10f);
+                    _shootingInstigator.DoShoot(_targetPosition);
                 }
             }
-
         }
 
         private void HandleMovement()
         {
             Vector3 moveAmount = new Vector3(_movement.x, 0, _movement.y);
 
-            if (moveAmount == Vector3.zero)
-            {
-                //idleing
-                _animator.SetBool("running", false);
-            }
-            else
-            {
-                //running
-                _animator.SetBool("running", true);
-            }
-
             _characterController.Move(moveAmount * Time.deltaTime * _playerSpeed);
 
             _playerVelocity.y += _gravityValue * Time.deltaTime;
 
             _characterController.Move(_playerVelocity * Time.deltaTime);
+
+            UpdateAnimation(moveAmount);
         }
 
         private void HandleInput()
         {
             _movement = _playerControls.Controls.Movement.ReadValue<Vector2>();
-            _aim = _playerControls.Controls.Aim.ReadValue<Vector2>();
+
+            //need to differentiate between two different types. Stick input values messed everything up because connected
+            if (_isGamepad)
+            {
+                _aim = _playerControls.Controls.Aim.ReadValue<Vector2>();
+            }
+            else
+            {
+                _mouseAim = _playerControls.Controls.MouseAim.ReadValue<Vector2>();
+            }
+        }
+
+        //update to anim blending one day :)
+        private void UpdateAnimation(Vector3 moveAmount)
+        {
+            if (moveAmount == Vector3.zero)
+            {
+                //idleing
+                _animator.SetBool("runningForward", false);
+                _animator.SetBool("runningBackward", false);
+            }
+            else
+            {
+                //positive means running in the direction the player is viewing
+                float forwardDir = Vector3.Dot(transform.forward, moveAmount);
+
+                if (forwardDir > 0.1f)
+                {
+                    _animator.SetBool("runningForward", true);
+                    _animator.SetBool("runningBackward", false);
+                }
+                else
+                {
+                    _animator.SetBool("runningForward", false);
+                    _animator.SetBool("runningBackward", true);
+                }
+            }
         }
 
         private void OnInputDeviceChanged(PlayerInput playerInput)
