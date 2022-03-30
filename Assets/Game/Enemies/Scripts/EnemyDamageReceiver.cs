@@ -28,8 +28,13 @@ namespace Game.Enemies.Scripts
 
             if (_damagableBehaviour.IsDead)
             {
-                _onDied?.Invoke(this, info);
+                PostOnDiedEvent(info);
             }
+        }
+
+        private void PostOnDiedEvent(HealthChangeInfo info)
+        {
+            _onDied?.Invoke(this, info);
         }
 
     }

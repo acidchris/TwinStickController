@@ -1,9 +1,11 @@
 
 using UnityEngine;
+using UnityEngine.Pool;
+
 
 namespace Game.Shooting.Scripts
 {
-    public class SimpleBulletMover : MonoBehaviour
+    public class SimpleBulletMover : ABullet
     {
         private Vector3 _startPosition = Vector3.zero;
         private Vector3 _endPosition = Vector3.zero;
@@ -13,14 +15,13 @@ namespace Game.Shooting.Scripts
         [SerializeField, Range(0.01f, 1f)]
         private float _tracerDuration = 0.06f;
 
-        public void Setup(Vector3 start, Vector3 destination)
+        public override void SetupBullet(Vector3 start, Vector3 destination)
         {
             _startPosition = start;
             _endPosition = destination;
             _start = true;
             _progress = 0f;
         }
-
 
         void Update()
         {
@@ -35,7 +36,16 @@ namespace Game.Shooting.Scripts
                 //transform.position += (_endPosition - _startPosition).normalized * Time.deltaTime * _speed;
 
                 if (percentageComplete > 2f)
-                    Destroy(gameObject);
+                {
+                    if (Pool != null)
+                    {
+                        Pool.Release(this);
+                    }
+                    else
+                    {
+                        Destroy(gameObject);
+                    }
+                }
             }
         }
     }
