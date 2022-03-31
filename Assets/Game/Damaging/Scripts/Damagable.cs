@@ -8,7 +8,7 @@ namespace Game.Damaging.Scripts
     /// <summary>
     /// Simple damageable behaviour implementing health and health changes
     /// </summary>
-    public class DamagableBehaviour : MonoBehaviour
+    public class Damagable : MonoBehaviour
     {
         protected float _currentHealth { get; private set; }
         [SerializeField] private float _maxHealth;

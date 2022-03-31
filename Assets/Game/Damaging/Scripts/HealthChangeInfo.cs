@@ -5,7 +5,7 @@ namespace Game.Damaging.Scripts
 {
     public struct HealthChangeInfo
     {
-        public DamagableBehaviour damageable;
+        public Damagable damageable;
         public float oldHealth;
 
         public float newHealth;

@@ -1,15 +1,11 @@
-using Game.Damaging.Scripts;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game.Enemies.Scripts
+namespace Game.Damaging.Scripts
 {
 
-    public class EnemyHealthVisualizer : MonoBehaviour
+    public class SimpleHealthVisualizer : MonoBehaviour
     {
-        [SerializeField] private DamagableBehaviour _damagableBehaviour = null;
+        [SerializeField] private Damagable _damagable = null;
 
         [SerializeField] private Transform _backgroundBar = null;
         [SerializeField] private Transform _healthBar = null;
@@ -21,15 +17,23 @@ namespace Game.Enemies.Scripts
 
         private void Awake()
         {
-            _damagableBehaviour._onHealthChanged += OnHealthChanged;
+            _damagable._onHealthChanged += OnHealthChanged;
             _mainCamera = Camera.main.transform;
 
             gameObject.SetActive(_showWhenAtFullHealth);
         }
 
+        private void Start()
+        {
+            if (_showWhenAtFullHealth)
+            {
+                UpdateHealth(_damagable.NormalisedHealth);
+            }
+        }
+
         private void OnDestroy()
         {
-            _damagableBehaviour._onHealthChanged -= OnHealthChanged;
+            _damagable._onHealthChanged -= OnHealthChanged;
         }
 
         private void Update()

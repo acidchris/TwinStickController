@@ -3,7 +3,7 @@
 namespace Game
 {
 
-    public interface IGameStaticModule
+    public interface IGameModule
     {
         void InitializeModule();
     }

@@ -1,5 +1,8 @@
 
+using Game.Damaging.Scripts;
+using Game.Player.Scripts;
 using Game.Shooting.Scripts;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -33,6 +36,10 @@ namespace Game.Input.Scripts
         private Animator _animator = null;
 
         private IShootingInstigator _shootingInstigator = null;
+        private PlayerDamageReceiver _playerDamageReceiver = null;
+
+        private int _animForwardHash = Animator.StringToHash("runningForward");
+        private int _animBackwardHash = Animator.StringToHash("runningBackward");
 
         protected void Awake()
         {
@@ -44,11 +51,16 @@ namespace Game.Input.Scripts
             _animator = GetComponentInChildren<Animator>();
 
             _shootingInstigator = GetComponent<IShootingInstigator>();
+            _playerDamageReceiver = GetComponentInChildren<PlayerDamageReceiver>();
+        }
+
+        protected void Start()
+        {
+            _playerDamageReceiver._onDied += OnDied;
         }
 
         private void OnKeyboardMouseShootStart(InputAction.CallbackContext obj)
         {
-            //_shootingInstigator.DoShoot(_targetPosition);
             _mouseShootingStarted = true;
         }
 
@@ -60,6 +72,8 @@ namespace Game.Input.Scripts
         protected void OnDestroy()
         {
             _playerInput.onControlsChanged -= OnInputDeviceChanged;
+
+            _playerDamageReceiver._onDied -= OnDied;
         }
 
         private void OnEnable()
@@ -167,8 +181,8 @@ namespace Game.Input.Scripts
             if (moveAmount == Vector3.zero)
             {
                 //idleing
-                _animator.SetBool("runningForward", false);
-                _animator.SetBool("runningBackward", false);
+                _animator.SetBool(_animForwardHash, false);
+                _animator.SetBool(_animBackwardHash, false);
             }
             else
             {
@@ -177,13 +191,13 @@ namespace Game.Input.Scripts
 
                 if (forwardDir > 0.1f)
                 {
-                    _animator.SetBool("runningForward", true);
-                    _animator.SetBool("runningBackward", false);
+                    _animator.SetBool(_animForwardHash, true);
+                    _animator.SetBool(_animBackwardHash, false);
                 }
                 else
                 {
-                    _animator.SetBool("runningForward", false);
-                    _animator.SetBool("runningBackward", true);
+                    _animator.SetBool(_animForwardHash, false);
+                    _animator.SetBool(_animBackwardHash, true);
                 }
             }
         }
@@ -192,6 +206,19 @@ namespace Game.Input.Scripts
         {
             _isGamepad = playerInput.currentControlScheme.Contains("Gamepad");
         }
+
+        private void OnDied(object sender, HealthChangeInfo _)
+        {
+            _playerDamageReceiver._onDied -= OnDied;
+
+            //disable all kinds of player inputs
+            _playerInput.enabled = false;
+            _playerControls.Disable();
+            _mouseShootingStarted = false;
+
+            _animator.SetTrigger("died");
+        }
+
     }
 
 }

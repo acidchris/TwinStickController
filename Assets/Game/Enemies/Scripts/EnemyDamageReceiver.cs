@@ -7,18 +7,13 @@ namespace Game.Enemies.Scripts
 {
     public class EnemyDamageReceiver : MonoBehaviour, IDamageReceiver
     {
-        [SerializeField] private DamagableBehaviour _damagableBehaviour = null;
+        [SerializeField] private Damagable _damagableBehaviour = null;
 
         public event EventHandler<HealthChangeInfo> _onDied = null;
 
         void Start()
         {
             _damagableBehaviour.Init();
-        }
-
-        void OnDestroy()
-        {
-
         }
 
         public void TakeDamage(float baseAmount, Vector3 hitPoint)
