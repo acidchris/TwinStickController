@@ -35,6 +35,9 @@ namespace Game.Input.Scripts
 
         private Animator _animator = null;
 
+        public RuntimeAnimatorController _runtimeAnimControllerPistol = null;
+        public RuntimeAnimatorController _runtimeAnimControllerDefault = null;
+
         private IShootingInstigator _shootingInstigator = null;
         private PlayerDamageReceiver _playerDamageReceiver = null;
 
@@ -49,6 +52,7 @@ namespace Game.Input.Scripts
             _playerInput.onControlsChanged += OnInputDeviceChanged;
 
             _animator = GetComponentInChildren<Animator>();
+            _runtimeAnimControllerDefault = _animator.runtimeAnimatorController;
 
             _shootingInstigator = GetComponent<IShootingInstigator>();
             _playerDamageReceiver = GetComponentInChildren<PlayerDamageReceiver>();
@@ -59,14 +63,28 @@ namespace Game.Input.Scripts
             _playerDamageReceiver._onDied += OnDied;
         }
 
-        private void OnKeyboardMouseShootStart(InputAction.CallbackContext obj)
+        private void OnKeyboardMouseShootStart(InputAction.CallbackContext _)
         {
             _mouseShootingStarted = true;
         }
 
-        private void OnKeyboardMouseShootCancelled(InputAction.CallbackContext obj)
+        private void OnKeyboardMouseShootCancelled(InputAction.CallbackContext _)
         {
             _mouseShootingStarted = false;
+        }
+
+        private void OnWeaponSwitchingPerformed(InputAction.CallbackContext _)
+        {
+            if (_animator.runtimeAnimatorController == _runtimeAnimControllerDefault)
+            {
+                _animator.runtimeAnimatorController = _runtimeAnimControllerPistol;
+            }
+            else
+            {
+                _animator.runtimeAnimatorController = _runtimeAnimControllerDefault;
+            }
+
+            _shootingInstigator.TryChangeWeapons();
         }
 
         protected void OnDestroy()
@@ -82,6 +100,8 @@ namespace Game.Input.Scripts
 
             _playerControls.Controls.Shoot.started += OnKeyboardMouseShootStart;
             _playerControls.Controls.Shoot.canceled += OnKeyboardMouseShootCancelled;
+
+            _playerControls.Controls.WeaponSwitching.performed += OnWeaponSwitchingPerformed;
         }
 
         private void OnDisable()
@@ -89,6 +109,7 @@ namespace Game.Input.Scripts
             _playerControls.Disable();
             _playerControls.Controls.Shoot.performed -= OnKeyboardMouseShootStart;
             _playerControls.Controls.Shoot.canceled -= OnKeyboardMouseShootCancelled;
+            _playerControls.Controls.WeaponSwitching.performed -= OnWeaponSwitchingPerformed;
             _mouseShootingStarted = false;
         }
 
@@ -118,7 +139,7 @@ namespace Game.Input.Scripts
                     Debug.DrawLine(transform.position, (transform.forward * 100.0f + transform.position), Color.green, 1f);
 
                     //fire a shot
-                    _shootingInstigator.DoShoot(targetPos);
+                    _shootingInstigator.TryToShoot(targetPos);
                 }
             }
             else
@@ -131,6 +152,7 @@ namespace Game.Input.Scripts
 
                     if (Physics.Raycast(ray, out hit))
                     {
+                        //corrected y-pos
                         _targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
 
                         Quaternion rotation = Quaternion.LookRotation(_targetPosition - transform.position);
@@ -142,7 +164,7 @@ namespace Game.Input.Scripts
                 //workaround for continuous "hold mouse shoot button" inputs
                 if (_mouseShootingStarted)
                 {
-                    _shootingInstigator.DoShoot(_targetPosition);
+                    _shootingInstigator.TryToShoot(_targetPosition);
                 }
             }
         }

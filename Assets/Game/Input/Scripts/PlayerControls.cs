@@ -64,6 +64,15 @@ namespace Game.Input.Scripts
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""WeaponSwitching"",
+                    ""type"": ""Button"",
+                    ""id"": ""44bf7be6-061b-4786-b35a-c08d45bd6519"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -165,6 +174,28 @@ namespace Game.Input.Scripts
                     ""action"": ""MouseAim"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""104d35ec-4dc4-4424-aed1-d20b16380f50"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""WeaponSwitching"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5e7a9ace-8063-42c7-9169-30a1716e88f7"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""WeaponSwitching"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -205,6 +236,7 @@ namespace Game.Input.Scripts
             m_Controls_Aim = m_Controls.FindAction("Aim", throwIfNotFound: true);
             m_Controls_Shoot = m_Controls.FindAction("Shoot", throwIfNotFound: true);
             m_Controls_MouseAim = m_Controls.FindAction("MouseAim", throwIfNotFound: true);
+            m_Controls_WeaponSwitching = m_Controls.FindAction("WeaponSwitching", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -268,6 +300,7 @@ namespace Game.Input.Scripts
         private readonly InputAction m_Controls_Aim;
         private readonly InputAction m_Controls_Shoot;
         private readonly InputAction m_Controls_MouseAim;
+        private readonly InputAction m_Controls_WeaponSwitching;
         public struct ControlsActions
         {
             private @PlayerControls m_Wrapper;
@@ -276,6 +309,7 @@ namespace Game.Input.Scripts
             public InputAction @Aim => m_Wrapper.m_Controls_Aim;
             public InputAction @Shoot => m_Wrapper.m_Controls_Shoot;
             public InputAction @MouseAim => m_Wrapper.m_Controls_MouseAim;
+            public InputAction @WeaponSwitching => m_Wrapper.m_Controls_WeaponSwitching;
             public InputActionMap Get() { return m_Wrapper.m_Controls; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -297,6 +331,9 @@ namespace Game.Input.Scripts
                     @MouseAim.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnMouseAim;
                     @MouseAim.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnMouseAim;
                     @MouseAim.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnMouseAim;
+                    @WeaponSwitching.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnWeaponSwitching;
+                    @WeaponSwitching.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnWeaponSwitching;
+                    @WeaponSwitching.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnWeaponSwitching;
                 }
                 m_Wrapper.m_ControlsActionsCallbackInterface = instance;
                 if (instance != null)
@@ -313,6 +350,9 @@ namespace Game.Input.Scripts
                     @MouseAim.started += instance.OnMouseAim;
                     @MouseAim.performed += instance.OnMouseAim;
                     @MouseAim.canceled += instance.OnMouseAim;
+                    @WeaponSwitching.started += instance.OnWeaponSwitching;
+                    @WeaponSwitching.performed += instance.OnWeaponSwitching;
+                    @WeaponSwitching.canceled += instance.OnWeaponSwitching;
                 }
             }
         }
@@ -341,6 +381,7 @@ namespace Game.Input.Scripts
             void OnAim(InputAction.CallbackContext context);
             void OnShoot(InputAction.CallbackContext context);
             void OnMouseAim(InputAction.CallbackContext context);
+            void OnWeaponSwitching(InputAction.CallbackContext context);
         }
     }
 }

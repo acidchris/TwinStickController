@@ -7,7 +7,7 @@ using System;
 namespace Game.Shooting.Scripts
 {
 
-    public class PistolShooting : MonoBehaviour
+    public class RifleShooting : MonoBehaviour
     {
         [SerializeField] private GameObject _bulletPrefab = null;
         [SerializeField] private Transform _bulletContainer = null;
