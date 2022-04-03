@@ -1,12 +1,10 @@
 
-using UnityEngine;
-using UnityEngine.Pool;
-using Game.Damaging.Scripts;
-using System;
 
 namespace Game.Shooting.Scripts
 {
+    public sealed class RifleShooting : TracerRoundShootingWeapon { }
 
+#if _RIFLE_DEPRECATED
     public class RifleShooting : MonoBehaviour
     {
         [SerializeField] private GameObject _bulletPrefab = null;
@@ -109,5 +107,5 @@ namespace Game.Shooting.Scripts
         }
 
     }
-
+#endif
 }

@@ -169,7 +169,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.1748466, y: 1}
+    m_SensorSize: {x: 1.4576272, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -1938,8 +1938,8 @@ GameObject:
   - component: {fileID: 1833671832}
   - component: {fileID: 1833671831}
   - component: {fileID: 1833671834}
-  - component: {fileID: 1833671835}
-  - component: {fileID: 1833671836}
+  - component: {fileID: 1833671838}
+  - component: {fileID: 1833671837}
   m_Layer: 0
   m_Name: PlayerStuff
   m_TagString: Untagged
@@ -2047,29 +2047,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _heldWeapons:
-  - {fileID: 1833671835}
-  - {fileID: 1833671836}
---- !u!114 &1833671835
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1833671829}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c7b1422692f3d546a1289c6ec1c3802, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _bulletPrefab: {fileID: 6558648641668233485, guid: 90d2c0ec4043dff4e9d9fa0a40a3e44d,
-    type: 3}
-  _bulletContainer: {fileID: 1115129844}
-  _muzzleRotation: {fileID: 269944771}
-  _weaponObject: {fileID: 1439231789}
-  _damageAmount: 4
-  _shootInterval: 0.33
-  _bulletSpreadFactor: 0.1
---- !u!114 &1833671836
+  - {fileID: 1833671838}
+  - {fileID: 1833671837}
+--- !u!114 &1833671837
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2081,14 +2061,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88c7558ea3bf8e34a8083b2aeae8ff38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _weaponProperties:
+    BaseDamage: 2
+    ShootingInterval: 0.1
+    BulletSpreadFactor: 0.2
   _bulletPrefab: {fileID: 6558648641668233485, guid: 90d2c0ec4043dff4e9d9fa0a40a3e44d,
     type: 3}
   _bulletContainer: {fileID: 1115129844}
   _muzzleRotation: {fileID: 1909375197}
   _weaponObject: {fileID: 83735275}
-  _damageAmount: 2
-  _shootInterval: 0.1
-  _bulletSpreadFactor: 0.2
+--- !u!114 &1833671838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1833671829}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c7b1422692f3d546a1289c6ec1c3802, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _weaponProperties:
+    BaseDamage: 4
+    ShootingInterval: 0.25
+    BulletSpreadFactor: 0
+  _bulletPrefab: {fileID: 6558648641668233485, guid: 90d2c0ec4043dff4e9d9fa0a40a3e44d,
+    type: 3}
+  _bulletContainer: {fileID: 1115129844}
+  _muzzleRotation: {fileID: 269944771}
+  _weaponObject: {fileID: 1439231789}
 --- !u!1001 &1909375195
 PrefabInstance:
   m_ObjectHideFlags: 0

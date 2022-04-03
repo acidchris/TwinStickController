@@ -13,7 +13,7 @@ namespace Game
 
         public void InitializeModule()
         {
-            
+            Debug.Assert(_playerTransform != null);
         }
 
 
