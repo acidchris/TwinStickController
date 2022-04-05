@@ -15,6 +15,8 @@ namespace Game.Enemies.Scripts
         [SerializeField] private int _numberOfEnemies = 3;
         [SerializeField] private float _spawnInterval = 2.0f;
 
+        private PlayerTrackingGameModule _playerTrackingModule = null;
+
         private int _numberOfSpawnedEnemies = 0;
         
         private float _lastSpawnTime = 0f;
@@ -27,6 +29,11 @@ namespace Game.Enemies.Scripts
         }
 
         private State _state = State.Idle;
+
+        private void Start()
+        {
+            _playerTrackingModule = GameStatics.QueryGameModule<PlayerTrackingGameModule>(nameof(PlayerTrackingGameModule));
+        }
 
         public void StartSpawning()
         {
@@ -66,8 +73,10 @@ namespace Game.Enemies.Scripts
                 var brain = obj.GetComponent<EnemyBrain>();
                 if (brain)
                 {
-                    brain.Setup(_seekerDestination.position);
-                    //brain.SetChaseTarget(GameObject.FindGameObjectWithTag("Player"));   //hahahha
+                    //brain.Setup(_seekerDestination.position);  //some static stuff
+                    //brain.SetChaseTarget(GameObject.FindGameObjectWithTag("Player"));   //hahahha thats how the pros on 4th floor do it
+
+                    brain.SetChaseTarget(_playerTrackingModule.PlayerTransform.gameObject);
                 }
 
                 ++_numberOfSpawnedEnemies;
